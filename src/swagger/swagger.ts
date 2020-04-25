@@ -1,4 +1,5 @@
 import { getUsers } from "./endpoints/users.swagger";
+import { getMeetings, newMeeting } from "./endpoints/meetings.swagger";
 
 export const swaggerDocument = {
     openapi: '3.0.1',
@@ -23,8 +24,22 @@ export const swaggerDocument = {
         }
     ],
     paths: {
+        // USERS
         "/api/v1/users": {
             "get": getUsers
+        },
+        // MEETINGS
+        "/api/v1/meetings": {
+            "get": getMeetings
+        },
+        "/api/v1/newMeeting": {
+            "post": newMeeting,
+            "parameters": {
+                "in": "body",
+                "user": "userId",
+                "startDate": "date",
+                "endDate": "date",
+            }
         }
     }
 }

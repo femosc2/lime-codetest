@@ -5,6 +5,13 @@ interface IUser {
   name: String;
 }
 
+export interface IMeeting {
+  user: String;
+  startDate: Date;
+  endDate: Date;
+  meetingId: String;
+}
+
 export const getUsersFromSchedule = (): Promise<IUser[]> => {
   const userObjects: IUser[] = [];
   fs.readFile('freebusy.txt', 'utf-8', (err: NodeJS.ErrnoException, data: string) => {
@@ -18,6 +25,23 @@ export const getUsersFromSchedule = (): Promise<IUser[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(userObjects);
+    }, 1000)
+  })
+}
+
+export const getMeetingsFromSchedule = (): Promise<IMeeting[]> => {
+  const meetings: IMeeting[] = [];
+  fs.readFile('freebusy.txt', 'utf-8', (err: NodeJS.ErrnoException, data: string) => {
+    if (err) {
+      console.log(err)
+    }
+    // const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 1))));
+    const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 2))))
+    console.log(mutatedData);
+  });
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(meetings);
     }, 1000)
   })
 }

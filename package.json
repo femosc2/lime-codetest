@@ -43,7 +43,8 @@
     "express": "^4.17.1",
     "nodemon": "^2.0.3",
     "ts-node": "^8.9.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "uuidv4": "^6.0.7"
   },
   "dependencies": {
     "swagger-ui-express": "^4.1.4"
