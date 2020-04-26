@@ -5,7 +5,7 @@ export const getMeetings = {
   responses: {
     "200": {
       description: "A list of meetings.",
-      "content": {
+      content: {
         "application/json": {
           schema: {
             type: "array",
@@ -34,56 +34,33 @@ export const getMeetings = {
   }
 }
 
-export const newMeeting = {
-  tags: ['Meetings'],
-  description: "Create a new Meeting",
-  operationId: 'newMeeting',
-  post: {
-    tags: ['CRUD operations'],
-    description: 'Create users',
-    operationId: 'createUsers',
-    parameters: [{
-      name: "name"
-    }],
-    requestBody: {
-      content: {
-        'application/json': {
-          schema: {
-            user: "userId",
-          }
-        }
-      },
-      required: true
-    },
-    responses: {
-      "200": {
-        description: "Creates a new Meeting",
-        "content": {
-          "application/json": {
-            schema: {
-              type: "array",
-              items: {
-                startDate: {
-                  type: 'date',
-                  description: 'Start Date'
-                },
-                endDate: {
-                  type: 'date',
-                  description: 'End Date'
-                },
-                user: {
-                  type: 'string',
-                  description: 'User ID'
-                },
-                meetingId: {
-                  type: 'string',
-                  description: 'Meeting Id'
-                },
-              }
-            }
-          }
-        }
+export const createMeeting = {
+  'tags': ['Meetings'],
+  'description': 'Create a new meeting',
+  'operationId': 'createMeeting',
+  'consumes': "application/json",
+  "parameters": [
+    {
+      "in": "query",
+      "name": "newMeeting",
+      "description": "The new Meeting to create",
+      "schema": {
+        "$ref": "#/definitions/Meeting"
       }
+    }
+  ],
+  'produces': [
+    "application/json"
+  ],
+  'responses': {
+    '200': {
+      'description': "OK",
+      'schema': {
+        '$ref': "#/definitions/Meeting"
+      }
+    },
+    '400': {
+      'description': "Failed. Bad post data."
     }
   }
 }

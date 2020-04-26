@@ -1,5 +1,5 @@
 import { getUsers } from "./endpoints/users.swagger";
-import { getMeetings, newMeeting } from "./endpoints/meetings.swagger";
+import { getMeetings, createMeeting } from "./endpoints/meetings.swagger";
 
 export const swaggerDocument = {
     openapi: '3.0.1',
@@ -18,6 +18,7 @@ export const swaggerDocument = {
             url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
         }
     },
+    security: [{api_key: [""]}],
     tags: [
         {
             name: 'users'
@@ -32,13 +33,23 @@ export const swaggerDocument = {
         "/api/v1/meetings": {
             "get": getMeetings
         },
-        "/api/v1/newMeeting": {
-            "post": newMeeting,
-            "parameters": {
-                "in": "body",
-                "user": "userId",
-                "startDate": "date",
-                "endDate": "date",
+        "/api/v1/meetings/createMeeting": {
+            "post": createMeeting
+        }
+    },
+    definitions: {
+        "Meeting": {
+            "type": "object",
+            "properties": {
+                "startDate": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
             }
         }
     }

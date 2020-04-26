@@ -1,15 +1,15 @@
 import fs from "fs";
 
 interface IUser {
-  id: String;
-  name: String;
+  id: string;
+  name: string;
 }
 
 export interface IMeeting {
-  user: String;
-  startDate: Date;
-  endDate: Date;
-  meetingId: String;
+  user: string;
+  startDate: string;
+  endDate: string;
+  meetingId: string;
 }
 
 export const getUsersFromSchedule = (): Promise<IUser[]> => {
@@ -35,7 +35,6 @@ export const getMeetingsFromSchedule = (): Promise<IMeeting[]> => {
     if (err) {
       console.log(err)
     }
-    // const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 1))));
     const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 2))))
     console.log(mutatedData);
   });
