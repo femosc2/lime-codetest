@@ -1,3 +1,4 @@
 freebusy.txt
 node_modules
 src/services/freebusy.txt
+.env

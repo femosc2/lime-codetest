@@ -1,4 +1,5 @@
 import fs from "fs";
+import { db } from '../index';
 
 interface IUser {
   id: string;
@@ -12,21 +13,23 @@ export interface IMeeting {
   meetingId: string;
 }
 
-export const getUsersFromSchedule = (): Promise<IUser[]> => {
-  const userObjects: IUser[] = [];
+export const getUsersFromSchedule = () => {
   fs.readFile('freebusy.txt', 'utf-8', (err: NodeJS.ErrnoException, data: string) => {
+    const userObjects: IUser[] = [];
     if (err) {
       console.log(err)
     }
     const mutatedData = data.split(/\n/).filter((u) => (/[a-z]/.test(u.charAt(u.length - 2))));
     const users = mutatedData.map((u) => u.split(';'));
-    users.map((u) => userObjects.push({id: u[0], name: u[1].substring(0, u[1].length - 2)}));
+    users.map((u) => userObjects.push({ id: u[0], name: u[1].substring(0, u[1].length - 2) }));
+    userObjects.map((u) => {
+      db.ref(`users/${u.id}`).set({
+        name: u.name,
+        id: u.id,
+      })
+    }
+    )
   });
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(userObjects);
-    }, 1000)
-  })
 }
 
 export const getMeetingsFromSchedule = (): Promise<IMeeting[]> => {
@@ -36,7 +39,6 @@ export const getMeetingsFromSchedule = (): Promise<IMeeting[]> => {
       console.log(err)
     }
     const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 2))))
-    console.log(mutatedData);
   });
   return new Promise((resolve, reject) => {
     setTimeout(() => {

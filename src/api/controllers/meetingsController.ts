@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getMeetingsFromSchedule, IMeeting } from '../../services/scheduleReader';
+import { getMeetingsFromSchedule, IMeeting, getUsersFromSchedule } from '../../services/scheduleReader';
 import { uuid } from 'uuidv4';
 
 
@@ -13,8 +13,8 @@ export const getMeetings = (req: Request, res: Response) => {
 }
 
 export const createMeeting = (req: Request, res: Response) => {
-  let startDate;
-  let endDate;
+  let startDate: Date;
+  let endDate: Date;
   // 2020-04-24 20:30;
   startDate = new Date(req.query.startDate.toString());
   endDate = new Date(req.query.endDate.toString());
@@ -24,15 +24,16 @@ export const createMeeting = (req: Request, res: Response) => {
   } else {
     console.log(startDate);
     console.log(endDate);
-    const newMeeting: IMeeting = {
-      meetingId: uuid(),
-      startDate,
-      endDate,
-      user: req.query.user.toString(),
+    const users = getUsersFromSchedule();
+      const newMeeting: IMeeting = {
+        meetingId: uuid(),
+        startDate,
+        endDate,
+        user: req.query.user.toString(),
+      }
+      console.log(newMeeting)
+      res.status(200).send({
+        newMeeting
+      })
     }
-    console.log(newMeeting)
-    res.status(200).send({
-      newMeeting
-    })
   }
-}
