@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { getUsersFromSchedule } from '../../services/scheduleReader';
+import { db } from '../../index';
 
 export const getUsers = (req: Request, res: Response) => {
-  const users = getUsersFromSchedule();
-  // users.then((users) => {
-  //   res.send({
-  //     users
-  //   })})
+  db.ref('/users').once('value').then((snapshot) => {
+    res.send({
+      snapshot
+    })
+  })
 }
