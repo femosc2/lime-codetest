@@ -13,16 +13,26 @@ export const getMeetings = (req: Request, res: Response) => {
 }
 
 export const createMeeting = (req: Request, res: Response) => {
-  console.log("lmao")
-  // const meetingId = uuid();
-  const newMeeting: IMeeting = {
-    meetingId: uuid(),
-    startDate: req.query.startDate.toString(),
-    endDate: req.query.endDate.toString(),
-    user: req.query.user.toString(),
+  let startDate;
+  let endDate;
+  // 2020-04-24 20:30;
+  startDate = new Date(req.query.startDate.toString());
+  endDate = new Date(req.query.endDate.toString());
+
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    res.status(400).send("Invalid Date Format");
+  } else {
+    console.log(startDate);
+    console.log(endDate);
+    const newMeeting: IMeeting = {
+      meetingId: uuid(),
+      startDate,
+      endDate,
+      user: req.query.user.toString(),
+    }
+    console.log(newMeeting)
+    res.status(200).send({
+      newMeeting
+    })
   }
-  console.log(newMeeting)
-  res.send({
-    newMeeting
-  })
 }

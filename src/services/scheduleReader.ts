@@ -7,8 +7,8 @@ interface IUser {
 
 export interface IMeeting {
   user: string;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   meetingId: string;
 }
 
