@@ -2,18 +2,18 @@ import { Request, Response } from 'express';
 import { IMeeting, IUser } from '../../services/scheduleReader';
 import { uuid } from 'uuidv4';
 import { db } from '../../index';
-import e = require('express');
-
+import { eachDayOfInterval } from 'date-fns'
 const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
-export const getMeetings = (req: Request, res: Response) => {
+export const getMeetings = (req: Request, res: Response): Response<any> => {
   db.ref('/meetings').once('value').then((snapshot) => {
-      res.status(200).send(snapshot.val());
+    res.status(200).send(snapshot.val());
   })
+  return null;
 }
 
-export const createMeeting = (req: Request, res: Response) => {
+export const createMeeting = (req: Request, res: Response): Response<any> => {
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
 
@@ -24,12 +24,12 @@ export const createMeeting = (req: Request, res: Response) => {
     // DATE FOR TESTING 2020-05-25T12:30:00
 
     if (!acceptedMinutes.includes(startDate.getMinutes()) ||
-        !acceptedHours.includes(startDate.getHours()) ||
-        !acceptedMinutes.includes(startDate.getMinutes()) ||
-        !acceptedMinutes.includes(endDate.getMinutes()) ||
-        !acceptedHours.includes(endDate.getHours())
-      ) {
-      res.status(400).send("Meetings can only occur in 30 minute intervals during 8-17")
+      !acceptedHours.includes(startDate.getHours()) ||
+      !acceptedMinutes.includes(startDate.getMinutes()) ||
+      !acceptedMinutes.includes(endDate.getMinutes()) ||
+      !acceptedHours.includes(endDate.getHours())
+    ) {
+      return res.status(400).send("Meetings can only occur in 30 minute intervals during 8-17")
     } else {
       const newMeeting: IMeeting = {
         meetingId: uuid(),
@@ -68,12 +68,19 @@ export const createMeeting = (req: Request, res: Response) => {
   }
 }
 
-export const suggestMeetings = (req: Request, res: Response) => {
+export const suggestMeetings = (req: Request, res: Response): Response<any> => {
   const reqUsers = req.query.users.toString().split(",")
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
 
+  const dayInterval = eachDayOfInterval({start: new Date(startDate),end: new Date(endDate)})
 
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return res.status(400).send("Invalid Date Format");
+  }
+  console.log(dayInterval);
+
+  res.status(200).send("Woo");
 
 
 }
