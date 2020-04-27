@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
-import { IMeeting } from '../../services/scheduleReader';
+import { IMeeting, IUser } from '../../services/scheduleReader';
 import { uuid } from 'uuidv4';
 import { db } from '../../index';
+import e = require('express');
 
+const acceptedMinutes: number[] = [0, 30];
+const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 export const getMeetings = (req: Request, res: Response) => {
   console.log("getting meetings")
@@ -14,8 +17,6 @@ export const getMeetings = (req: Request, res: Response) => {
 }
 
 export const createMeeting = (req: Request, res: Response) => {
-  const acceptedMinutes: number[] = [0, 30];
-  const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
 
@@ -26,10 +27,11 @@ export const createMeeting = (req: Request, res: Response) => {
     // DATE FOR TESTING 2020-05-25T12:30:00
 
     if (!acceptedMinutes.includes(startDate.getMinutes()) ||
-      !acceptedHours.includes(startDate.getHours()) ||
-      !acceptedMinutes.includes(startDate.getMinutes()) ||
-      !acceptedMinutes.includes(endDate.getMinutes()) ||
-      !acceptedHours.includes(endDate.getHours())) {
+        !acceptedHours.includes(startDate.getHours()) ||
+        !acceptedMinutes.includes(startDate.getMinutes()) ||
+        !acceptedMinutes.includes(endDate.getMinutes()) ||
+        !acceptedHours.includes(endDate.getHours())
+      ) {
       res.status(400).send("Meetings can only occur in 30 minute intervals during 8-17")
     } else {
       const newMeeting: IMeeting = {
@@ -38,25 +40,37 @@ export const createMeeting = (req: Request, res: Response) => {
         endDate: endDate.toString(),
         users: req.query.users.toString().split(",")
       }
-      // db.ref('/users').once('value').then((snapshot) => {
-      //   if (snapshot.hasChild("user".includes(req.query.user.toString()))) {
-      //     db.ref('/meetings').once('value').then((snapshot) => {
-      //       snapshot.forEach((cs) => {
-      //         if (cs.child("startDate").val() === newMeeting.startDate && cs.child("user").val() === newMeeting.users.includes(req.query.user.toString())) {
-      //           res.status(400).send("There is already a meeting booked for this user at this time.")
-      //         } else {
-      //           db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
-      //           res.status(200).send(newMeeting)
-      //         }
-      //       }
-      //       )
-      //     })
-      //   } else {
-      //     res.status(400).send("There is no user with this ID.")
-      //   }
-      // })
-      db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
-      res.status(200).send(newMeeting)
+
+      let users: IUser[];
+      let meetings: IMeeting[];
+      db.ref('/users').once('value').then((snapshot) => {
+        users = snapshot.val();
+        newMeeting.users.map((u: string) => {
+          if (!Object.keys(users).includes(u)) {
+            return res.status(400).send("One of the users does not exist.")
+          } else {
+            db.ref('/meetings').once('value').then((snapshot) => {
+              meetings = snapshot.val();
+              Object.entries(meetings).map((m) => {
+                if (m[1].startDate === newMeeting.startDate) {
+                  newMeeting.users.map((u: string) => {
+                    if (m[1].users.includes(u)) {
+                      return res.status(400).send("All of the requested users are not available for this meeting.")
+                    }
+                  })
+                }
+                db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
+                return res.status(200).send(newMeeting)
+              })
+            }
+            )
+          }
+        })
+      })
     }
   }
+}
+
+export const suggestMeetings = (req: Request, res: Response) => {
+  const reqUsers = req.query.users.toString().split(",")
 }

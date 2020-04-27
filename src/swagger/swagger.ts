@@ -1,5 +1,5 @@
 import { getUsers } from "./endpoints/users.swagger";
-import { getMeetings, createMeeting } from "./endpoints/meetings.swagger";
+import { getMeetings, createMeeting, suggestMeeting } from './endpoints/meetings.swagger';
 
 export const swaggerDocument = {
     openapi: '3.0.1',
@@ -33,8 +33,11 @@ export const swaggerDocument = {
         "/api/v1/meetings": {
             "get": getMeetings
         },
-        "/api/v1/meetings/createMeeting": {
+        "/api/v1/meetings/create": {
             "post": createMeeting
+        },
+        "/api/v1/meetings/suggest": {
+            "get": suggestMeeting,
         }
     },
     definitions: {
@@ -54,6 +57,6 @@ export const swaggerDocument = {
                     }
                 },
             }
-        }
+        },
     }
 }

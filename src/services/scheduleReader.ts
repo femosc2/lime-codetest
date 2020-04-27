@@ -1,7 +1,7 @@
 import fs from "fs";
 import { db } from '../index';
 
-interface IUser {
+export interface IUser {
   id: string;
   name: string;
 }

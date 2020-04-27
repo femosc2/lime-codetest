@@ -64,3 +64,34 @@ export const createMeeting = {
     }
   }
 }
+
+export const suggestMeeting = {
+  'tags': ['Meetings'],
+  'description': 'Suggest a meeting',
+  'operationId': 'suggestMeeting',
+  'consumes': "application/json",
+  "parameters": [
+    {
+      "in": "query",
+      "name": "suggestMeeting",
+      "description": "Suggest a meeting",
+      "schema": {
+        "$ref": "#/definitions/Meeting"
+      }
+    }
+  ],
+  'produces': [
+    "application/json"
+  ],
+  'responses': {
+    '200': {
+      'description': "OK",
+      'schema': {
+        '$ref': "#/definitions/Meeting"
+      }
+    },
+    '400': {
+      'description': "Failed. Bad post data."
+    }
+  }
+}

@@ -3,6 +3,6 @@ import { getMeetings, createMeeting } from '../controllers/meetingsController';
 const meetingsRouter = Router();
 
 meetingsRouter.get('/', getMeetings);
-meetingsRouter.post('/createMeeting', createMeeting);
+meetingsRouter.post('/create', createMeeting);
 
 export default meetingsRouter;
