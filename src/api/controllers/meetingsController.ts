@@ -73,14 +73,25 @@ export const suggestMeetings = (req: Request, res: Response): Response<any> => {
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
 
-  const dayInterval = eachDayOfInterval({start: new Date(startDate),end: new Date(endDate)})
+  let suggestedMeetings: Date[] = [];
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     return res.status(400).send("Invalid Date Format");
   }
-  console.log(dayInterval);
 
-  res.status(200).send("Woo");
+  const dayInterval = eachDayOfInterval({ start: new Date(startDate), end: new Date(endDate) })
+
+  dayInterval.map((d) => {
+    acceptedHours.map((ah) => {
+      const possMeeting = d.setHours(ah + 2);
+      const possMeetingHalfPast = new Date(d).setMinutes(30);
+      suggestedMeetings.push(new Date(possMeeting));
+      suggestedMeetings.push(new Date(possMeetingHalfPast));
+    })
+  })
+  console.log(suggestedMeetings)
+
+  res.status(200).send(suggestedMeetings);
 
 
 }
