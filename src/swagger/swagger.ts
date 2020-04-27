@@ -47,8 +47,11 @@ export const swaggerDocument = {
                 "endDate": {
                     "type": "string"
                 },
-                "user": {
-                    "type": "string"
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "user": "string"
+                    }
                 },
             }
         }
