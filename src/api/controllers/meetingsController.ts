@@ -8,12 +8,9 @@ const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
 export const getMeetings = (req: Request, res: Response) => {
-  console.log("getting meetings")
-  // const meetings = getMeetingsFromSchedule();
-  // meetings.then((meetings) => {
-  //   res.send({
-  //     meetings
-  //   })})
+  db.ref('/meetings').once('value').then((snapshot) => {
+      res.status(200).send(snapshot.val());
+  })
 }
 
 export const createMeeting = (req: Request, res: Response) => {
@@ -73,4 +70,10 @@ export const createMeeting = (req: Request, res: Response) => {
 
 export const suggestMeetings = (req: Request, res: Response) => {
   const reqUsers = req.query.users.toString().split(",")
+  const startDate = new Date(req.query.startDate.toString());
+  const endDate = new Date(req.query.endDate.toString());
+
+
+
+
 }
