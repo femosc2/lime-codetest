@@ -56,9 +56,9 @@ export const createMeeting = (req: Request, res: Response): Response<any> => {
                     }
                   })
                 }
-                db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
-                return res.status(200).send(newMeeting)
               })
+              db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
+              return res.status(200).send(newMeeting)
             }
             )
           }
@@ -72,6 +72,11 @@ export const suggestMeetings = (req: Request, res: Response): Response<any> => {
   const reqUsers = req.query.users.toString().split(",")
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
+  let meetings: IMeeting[] = [];
+
+  db.ref('/meetings').once('value').then((snapshot) => {
+    meetings = snapshot.val()
+  })
 
   let suggestedMeetings: Date[] = [];
 
@@ -89,7 +94,10 @@ export const suggestMeetings = (req: Request, res: Response): Response<any> => {
       suggestedMeetings.push(new Date(possMeetingHalfPast));
     })
   })
-  console.log(suggestedMeetings)
+
+  Object.entries(meetings).map((m) => {
+
+  })
 
   res.status(200).send(suggestedMeetings);
 
