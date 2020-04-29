@@ -3,6 +3,7 @@ import { IMeeting, IUser } from '../../services/scheduleReader';
 import { uuid } from 'uuidv4';
 import { db } from '../../index';
 import { eachDayOfInterval } from 'date-fns'
+
 const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
@@ -71,35 +72,52 @@ export const createMeeting = (req: Request, res: Response): Response<any> => {
 export const suggestMeetings = (req: Request, res: Response): Response<any> => {
   const reqUsers = req.query.users.toString().split(",")
   const startDate = new Date(req.query.startDate.toString());
+  startDate.setHours(startDate.getHours() + 2);
   const endDate = new Date(req.query.endDate.toString());
+  endDate.setHours(startDate.getHours() + 2);
+
   let meetings: IMeeting[] = [];
 
   db.ref('/meetings').once('value').then((snapshot) => {
     meetings = snapshot.val()
+
+    let suggestedMeetings: Date[] = [];
+    let removedDates: Date[] = [];
+    let timeslots: Date[] = getSuitableTimes(startDate, endDate);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return res.status(400).send("Invalid Date Format");
+    }
+    Object.entries(meetings).map((m) => {
+      let meetingLength = getSuitableTimes(new Date(m[1].startDate), new Date (m[1].endDate))
+      meetingLength.map((ml) => {
+        if (m[1].startDate == ml.toString() || m[1].endDate == ml.toString()) {
+          removedDates = [...removedDates.concat(...timeslots.filter((ts => ts.toString() === ml.toString())))]
+          suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
+        }
+      })
+    })
+    suggestedMeetings = [...new Set(suggestedMeetings)].filter(sm => !removedDates.includes(sm))
+    return res.status(200).send(suggestedMeetings);
   })
 
-  let suggestedMeetings: Date[] = [];
+  return null;
 
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return res.status(400).send("Invalid Date Format");
-  }
 
-  const dayInterval = eachDayOfInterval({ start: new Date(startDate), end: new Date(endDate) })
+}
+
+const getSuitableTimes = (startDate: Date, endDate: Date) => {
+  const dayInterval = eachDayOfInterval({ start: startDate, end: endDate })
+
+  let meetings: Date[] = [];
 
   dayInterval.map((d) => {
     acceptedHours.map((ah) => {
       const possMeeting = d.setHours(ah + 2);
       const possMeetingHalfPast = new Date(d).setMinutes(30);
-      suggestedMeetings.push(new Date(possMeeting));
-      suggestedMeetings.push(new Date(possMeetingHalfPast));
+      meetings.push(new Date(possMeeting));
+      meetings.push(new Date(possMeetingHalfPast));
     })
   })
-
-  Object.entries(meetings).map((m) => {
-
-  })
-
-  res.status(200).send(suggestedMeetings);
-
-
+  return meetings;
 }
