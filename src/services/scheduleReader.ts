@@ -31,18 +31,3 @@ export const getUsersFromSchedule = () => {
     )
   });
 }
-
-export const getMeetingsFromSchedule = (): Promise<IMeeting[]> => {
-  const meetings: IMeeting[] = [];
-  fs.readFile('freebusy.txt', 'utf-8', (err: NodeJS.ErrnoException, data: string) => {
-    if (err) {
-      console.log(err)
-    }
-    const mutatedData = data.split(/\n/).filter((u) => (/[A-Z0-9]/.test(u.charAt(u.length - 2))))
-  });
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(meetings);
-    }, 1000)
-  })
-}

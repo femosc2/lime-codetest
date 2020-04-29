@@ -75,10 +75,7 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
   startDate.setHours(startDate.getHours() + 2);
   const endDate = new Date(req.query.endDate.toString());
   endDate.setHours(endDate.getHours() + 2);
-
-  console.log(startDate);
-  console.log(endDate);
-
+  
   let meetings: IMeeting[] = [];
 
   db.ref('/meetings').once('value').then((snapshot) => {
@@ -99,13 +96,13 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
 
     if (filteredMeetings.length === 0) {
       return res.status(200).send(timeslots);
-    } 
+    }
 
     filteredMeetings.map((m) => {
       let meetingLength = getSuitableTimes(new Date(m.startDate), new Date(m.endDate))
       meetingLength.map((ml) => {
         if ((ml <= new Date(m.endDate) && ml >= new Date(m.startDate))) {
-          removedDates = [...removedDates.concat(...timeslots.filter((ts => ts.toString() === ml.toString())))]
+          removedDates = [...removedDates, ...timeslots.filter((ts => ts.toString() === ml.toString()))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
         }
       })
