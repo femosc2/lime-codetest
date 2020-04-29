@@ -7,14 +7,14 @@ import { eachDayOfInterval } from 'date-fns'
 const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
-export const getMeetings = (req: Request, res: Response): Response<any> => {
+export const getMeetings = (req: Request, res: Response): Response<IMeeting[]> => {
   db.ref('/meetings').once('value').then((snapshot) => {
     res.status(200).send(snapshot.val());
   })
   return null;
 }
 
-export const createMeeting = (req: Request, res: Response): Response<any> => {
+export const createMeeting = (req: Request, res: Response): Response<IMeeting> => {
   const startDate = new Date(req.query.startDate.toString());
   const endDate = new Date(req.query.endDate.toString());
 
@@ -49,10 +49,10 @@ export const createMeeting = (req: Request, res: Response): Response<any> => {
           } else {
             db.ref('/meetings').once('value').then((snapshot) => {
               meetings = snapshot.val();
-              Object.entries(meetings).map((m) => {
-                if (m[1].startDate === newMeeting.startDate) {
+              Object.values(meetings).map((m) => {
+                if (m.startDate === newMeeting.startDate) {
                   newMeeting.users.map((u: string) => {
-                    if (m[1].users.includes(u)) {
+                    if (m.users.includes(u)) {
                       return res.status(400).send("All of the requested users are not available for this meeting.")
                     }
                   })
@@ -69,18 +69,22 @@ export const createMeeting = (req: Request, res: Response): Response<any> => {
   }
 }
 
-export const suggestMeetings = (req: Request, res: Response): Response<any> => {
+export const suggestMeetings = (req: Request, res: Response): Response<Date[]> => {
   const reqUsers = req.query.users.toString().split(",")
   const startDate = new Date(req.query.startDate.toString());
   startDate.setHours(startDate.getHours() + 2);
   const endDate = new Date(req.query.endDate.toString());
-  endDate.setHours(startDate.getHours() + 2);
+  endDate.setHours(endDate.getHours() + 2);
+
+  console.log(startDate);
+  console.log(endDate);
 
   let meetings: IMeeting[] = [];
 
   db.ref('/meetings').once('value').then((snapshot) => {
     meetings = snapshot.val()
 
+    let filteredMeetings: IMeeting[] = [];
     let suggestedMeetings: Date[] = [];
     let removedDates: Date[] = [];
     let timeslots: Date[] = getSuitableTimes(startDate, endDate);
@@ -88,16 +92,29 @@ export const suggestMeetings = (req: Request, res: Response): Response<any> => {
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return res.status(400).send("Invalid Date Format");
     }
-    Object.entries(meetings).map((m) => {
-      let meetingLength = getSuitableTimes(new Date(m[1].startDate), new Date (m[1].endDate))
+
+    reqUsers.map((rq) => {
+      filteredMeetings = [...filteredMeetings.concat(...Object.values(meetings).filter((m) => m.users.includes(rq)))]
+    })
+
+    if (filteredMeetings.length === 0) {
+      return res.status(200).send(timeslots);
+    } 
+
+    filteredMeetings.map((m) => {
+      let meetingLength = getSuitableTimes(new Date(m.startDate), new Date(m.endDate))
       meetingLength.map((ml) => {
-        if (m[1].startDate == ml.toString() || m[1].endDate == ml.toString()) {
+        if (m.startDate == ml.toString() || m.endDate == ml.toString() || (ml.toString() <= m.endDate && ml.toString() >= m.startDate)) {
           removedDates = [...removedDates.concat(...timeslots.filter((ts => ts.toString() === ml.toString())))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
         }
       })
     })
+
     suggestedMeetings = [...new Set(suggestedMeetings)].filter(sm => !removedDates.includes(sm))
+    if (suggestedMeetings.length === 0) {
+      return res.status(200).send("No suitable times found!");
+    }
     return res.status(200).send(suggestedMeetings);
   })
 
@@ -106,7 +123,7 @@ export const suggestMeetings = (req: Request, res: Response): Response<any> => {
 
 }
 
-const getSuitableTimes = (startDate: Date, endDate: Date) => {
+const getSuitableTimes = (startDate: Date, endDate: Date): Date[] => {
   const dayInterval = eachDayOfInterval({ start: startDate, end: endDate })
 
   let meetings: Date[] = [];
