@@ -104,7 +104,7 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
     filteredMeetings.map((m) => {
       let meetingLength = getSuitableTimes(new Date(m.startDate), new Date(m.endDate))
       meetingLength.map((ml) => {
-        if (m.startDate == ml.toString() || m.endDate == ml.toString() || (ml.toString() <= m.endDate && ml.toString() >= m.startDate)) {
+        if ((ml <= new Date(m.endDate) && ml >= new Date(m.startDate))) {
           removedDates = [...removedDates.concat(...timeslots.filter((ts => ts.toString() === ml.toString())))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
         }
