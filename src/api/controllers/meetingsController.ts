@@ -7,7 +7,7 @@ import { eachDayOfInterval } from 'date-fns'
 const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
-export const getMeetings = ({}, res: Response): Response<IMeeting[]> => {
+export const getMeetings = ({ }, res: Response): Response<IMeeting[]> => {
   db.ref('/meetings').once('value').then((snapshot) => {
     return res.status(200).send(snapshot.val());
   })
@@ -19,7 +19,7 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
   const endDate = new Date(req.query.endDate.toString());
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    res.status(400).send("Invalid Date Format, use following format (2020-05-25T12:30:00)");
+    return res.status(400).send("Invalid Date Format, use following format (2020-05-25T12:30:00)");
   } else {
     if (!acceptedMinutes.includes(startDate.getMinutes()) ||
       !acceptedHours.includes(startDate.getHours()) ||
