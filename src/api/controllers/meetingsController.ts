@@ -50,7 +50,7 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
             db.ref('/meetings').once('value').then((snapshot) => {
               meetings = snapshot.val();
               Object.values(meetings).map((m) => {
-                if (m.startDate === newMeeting.startDate) {
+                if (new Date(newMeeting.startDate) <= new Date(m.endDate) && new Date(newMeeting.endDate) >= new Date(m.startDate)) {
                   newMeeting.users.map((u: string) => {
                     if (m.users.includes(u)) {
                       return res.status(400).send("All of the requested users are not available for this meeting.")
@@ -75,7 +75,6 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
   startDate.setHours(startDate.getHours() + 2);
   const endDate = new Date(req.query.endDate.toString());
   endDate.setHours(endDate.getHours() + 2);
-  
   let meetings: IMeeting[] = [];
 
   db.ref('/meetings').once('value').then((snapshot) => {
@@ -129,8 +128,8 @@ const getSuitableTimes = (startDate: Date, endDate: Date): Date[] => {
     acceptedHours.map((ah) => {
       const possMeeting = d.setHours(ah + 2);
       const possMeetingHalfPast = new Date(d).setMinutes(30);
-      meetings.push(new Date(possMeeting));
-      meetings.push(new Date(possMeetingHalfPast));
+      meetings = [...meetings, new Date(possMeeting)];
+      meetings = [...meetings, new Date(possMeetingHalfPast)]
     })
   })
   return meetings;
