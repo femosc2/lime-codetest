@@ -7,9 +7,9 @@ import { eachDayOfInterval } from 'date-fns'
 const acceptedMinutes: number[] = [0, 30];
 const acceptedHours: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
-export const getMeetings = (req: Request, res: Response): Response<IMeeting[]> => {
+export const getMeetings = ({}, res: Response): Response<IMeeting[]> => {
   db.ref('/meetings').once('value').then((snapshot) => {
-    res.status(200).send(snapshot.val());
+    return res.status(200).send(snapshot.val());
   })
   return null;
 }
@@ -59,7 +59,7 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
                 }
               })
               db.ref(`meetings/${newMeeting.meetingId}`).set(newMeeting)
-              return res.status(200).send(newMeeting)
+              return res.status(201).send(newMeeting)
             }
             )
           }
@@ -76,6 +76,9 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
   const endDate = new Date(req.query.endDate.toString());
   endDate.setHours(endDate.getHours() + 2);
   let meetings: IMeeting[] = [];
+
+  console.log(startDate)
+  console.log(endDate)
 
   db.ref('/meetings').once('value').then((snapshot) => {
     meetings = snapshot.val()
@@ -98,8 +101,10 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
     }
 
     filteredMeetings.map((m) => {
+      console.log(m)
       let meetingLength = getSuitableTimes(new Date(m.startDate), new Date(m.endDate))
       meetingLength.map((ml) => {
+        console.log(ml);
         if ((ml <= new Date(m.endDate) && ml >= new Date(m.startDate))) {
           removedDates = [...removedDates, ...timeslots.filter((ts => ts.toString() === ml.toString()))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]

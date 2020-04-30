@@ -53,7 +53,7 @@ export const createMeeting = {
     "application/json"
   ],
   'responses': {
-    '200': {
+    '201': {
       'description': "OK",
       'schema': {
         '$ref': "#/definitions/Meeting"

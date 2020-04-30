@@ -21,7 +21,7 @@ export const getUsersFromSchedule = () => {
     }
     const mutatedData = data.split(/\n/).filter((u) => (/[a-z]/.test(u.charAt(u.length - 2))));
     const users = mutatedData.map((u) => u.split(';'));
-    users.map((u) => userObjects.push({ id: u[0], name: u[1].substring(0, u[1].length - 2) }));
+    users.map((u) => userObjects.push({ id: u[0], name: u[1].substring(0, u[1].length - 1) }));
     userObjects.map((u) => {
       db.ref(`users/${u.id}`).set({
         name: u.name,
