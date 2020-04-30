@@ -19,11 +19,8 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
   const endDate = new Date(req.query.endDate.toString());
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    res.status(400).send("Invalid Date Format");
+    res.status(400).send("Invalid Date Format, use following format (2020-05-25T12:30:00)");
   } else {
-    // ID FOR TESTING 103222943108469712161093620402295866178
-    // DATE FOR TESTING 2020-05-25T12:30:00
-
     if (!acceptedMinutes.includes(startDate.getMinutes()) ||
       !acceptedHours.includes(startDate.getHours()) ||
       !acceptedMinutes.includes(startDate.getMinutes()) ||
@@ -43,7 +40,7 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
       let meetings: IMeeting[];
       db.ref('/users').once('value').then((snapshot) => {
         users = snapshot.val();
-        newMeeting.users.map((u: string) => {
+        newMeeting.users.map((u) => {
           if (!Object.keys(users).includes(u)) {
             return res.status(400).send("One of the users does not exist.")
           } else {
@@ -72,13 +69,10 @@ export const createMeeting = (req: Request, res: Response): Response<IMeeting> =
 export const suggestMeetings = (req: Request, res: Response): Response<Date[]> => {
   const reqUsers = req.query.users.toString().split(",")
   const startDate = new Date(req.query.startDate.toString());
-  startDate.setHours(startDate.getHours() + 2);
   const endDate = new Date(req.query.endDate.toString());
+  startDate.setHours(startDate.getHours() + 2);
   endDate.setHours(endDate.getHours() + 2);
   let meetings: IMeeting[] = [];
-
-  console.log(startDate)
-  console.log(endDate)
 
   db.ref('/meetings').once('value').then((snapshot) => {
     meetings = snapshot.val()
@@ -86,14 +80,14 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
     let filteredMeetings: IMeeting[] = [];
     let suggestedMeetings: Date[] = [];
     let removedDates: Date[] = [];
-    let timeslots: Date[] = getSuitableTimes(startDate, endDate);
+    const timeslots: Date[] = getSuitableTimes(startDate, endDate);
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      return res.status(400).send("Invalid Date Format");
+      return res.status(400).send("Invalid Date Format, use following format (2020-05-25T12:30:00)");
     }
 
     reqUsers.map((rq) => {
-      filteredMeetings = [...filteredMeetings.concat(...Object.values(meetings).filter((m) => m.users.includes(rq)))]
+      filteredMeetings = [...filteredMeetings, ...Object.values(meetings).filter((m) => m.users.includes(rq))]
     })
 
     if (filteredMeetings.length === 0) {
@@ -101,11 +95,14 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
     }
 
     filteredMeetings.map((m) => {
-      console.log(m)
       let meetingLength = getSuitableTimes(new Date(m.startDate), new Date(m.endDate))
       meetingLength.map((ml) => {
-        console.log(ml);
-        if ((ml <= new Date(m.endDate) && ml >= new Date(m.startDate))) {
+        const endDate = new Date(m.endDate);
+        const startDate = new Date(m.startDate);
+        startDate.setHours(startDate.getHours() + 2);
+        endDate.setHours(endDate.getHours() + 2);
+        endDate.setHours
+        if ((ml <= endDate && ml >= startDate)) {
           removedDates = [...removedDates, ...timeslots.filter((ts => ts.toString() === ml.toString()))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
         }
