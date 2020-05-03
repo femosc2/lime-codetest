@@ -101,7 +101,6 @@ export const suggestMeetings = (req: Request, res: Response): Response<Date[]> =
         const startDate = new Date(m.startDate);
         startDate.setHours(startDate.getHours() + 2);
         endDate.setHours(endDate.getHours() + 2);
-        endDate.setHours
         if ((ml <= endDate && ml >= startDate)) {
           removedDates = [...removedDates, ...timeslots.filter((ts => ts.toString() === ml.toString()))]
           suggestedMeetings = [...suggestedMeetings, ...timeslots.filter((ts => ts.toString() !== ml.toString()))]
